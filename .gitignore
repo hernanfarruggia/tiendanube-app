@@ -62,3 +62,7 @@ node_modules/
 
 # and uncomment the following lines
 .pnp.*
+
+# Others
+.handoff
+.cloudflared

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "module": "Node16",
     "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
     "composite": true,
@@ -18,8 +18,10 @@
       "@utils": ["./src/utils"],
       "@features/*": ["./src/features/*"],
       "@config": ["./src/config"],
+      "@config/*": ["./src/config/*"],
       "@middlewares": ["./src/middlewares"],
-      "@repository": ["./src/repository"]
+      "@repository": ["./src/repository"],
+      "@database/*": ["./src/database/*"]
     }
   },
   "include": ["src/**/*"],

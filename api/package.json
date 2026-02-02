@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:dev": "nodemon --watch 'src/**/*.ts' --watch './.env'"
+    "start:dev": "./scripts/start-dev.sh",
+    "start:dev:server-only": "nodemon --watch 'src/**/*.ts' --watch './.env'",
+    "db:stop": "./scripts/db-stop.sh",
+    "db:status": "./scripts/db-status.sh",
+    "test:phase1": "./scripts/test-phase1.sh"
   },
   "author": "",
   "license": "ISC",
@@ -15,8 +19,12 @@
     "express": "^4.18.2",
     "json-server": "^0.17.3",
     "morgan": "^1.10.0",
+    "node-cache": "^5.1.2",
+    "openai": "^6.16.0",
     "passport": "^0.5.2",
-    "passport-jwt": "^4.0.0"
+    "passport-jwt": "^4.0.0",
+    "pg": "^8.17.2",
+    "pgvector": "^0.2.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",
@@ -29,6 +37,7 @@
     "@types/node": "^20.2.5",
     "@types/passport": "^1.0.12",
     "@types/passport-jwt": "^3.0.9",
+    "@types/pg": "^8.16.0",
     "nodemon": "^2.0.22",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
