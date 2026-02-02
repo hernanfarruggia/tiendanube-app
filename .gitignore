@@ -59,6 +59,8 @@ node_modules/
 # if you are NOT using Zero-installs, then:
 # comment the following lines
 .yarn/cache
+.yarn/install-state.gz
+.yarn/build-state.yml
 
 # and uncomment the following lines
 .pnp.*
