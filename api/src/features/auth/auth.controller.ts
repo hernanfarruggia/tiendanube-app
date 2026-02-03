@@ -12,6 +12,14 @@ class AuthenticationController {
       const data = await InstallAppService.install(
         req.query.code as string
       );
+
+      // Use store_domain from the install response (e.g., ropatest3.mitiendanube.com)
+      if (data.store_domain) {
+        const redirectUrl = `https://${data.store_domain}/admin/apps/${process.env.CLIENT_ID}`;
+        return res.redirect(redirectUrl);
+      }
+
+      // Fallback: if store_domain is not available, return JSON
       return res.status(StatusCode.OK).json(data);
     } catch (e) {
       return next(e);

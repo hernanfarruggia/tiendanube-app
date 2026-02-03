@@ -23,7 +23,19 @@ const app = express();
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms")
 );
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      'https://*.tiendanube.com',
+      'https://*.nuvemshop.com.br',
+      'http://localhost:5173',
+      'http://localhost:3000',
+    ],
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../scripts')));
 app.use(beforeCheckClientMiddleware);
 app.use(AppRoutes);
 app.use(errorHandlingMiddleware);
