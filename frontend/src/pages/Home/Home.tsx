@@ -18,6 +18,7 @@ import {
   ExternalLinkIcon,
   PictureIcon,
   PlusCircleIcon,
+  SearchIcon,
 } from '@nimbus-ds/icons';
 
 import { nexo } from '@/app';
@@ -146,6 +147,10 @@ const Home: React.FC = () => {
                     </Button>
                     <Button onClick={() => navigate('/products')}>
                       Produtos
+                    </Button>
+                    <Button onClick={() => navigate('/ai-settings')}>
+                      <Icon color="currentColor" source={<SearchIcon />} />
+                      AI Search
                     </Button>
                   </Card.Footer>
                 </Card>

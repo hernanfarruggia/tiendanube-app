@@ -32,13 +32,13 @@ class ChatController {
         return;
       }
 
-      const session = await chatRepository.getSession(session_id);
+      let session = await chatRepository.getSession(session_id);
       if (!session) {
-        res.status(404).json({ error: 'Session not found' });
-        return;
+        await chatRepository.createSessionWithId(session_id, store_id);
+        // session = await chatRepository.getSession(session_id);
       }
 
-      const response = await chatService.chat(message, session_id, store_id, language || 'es');
+      const response = await chatService.chat(message, session_id, store_id, language || 'es_AR');
 
       res.json(response);
     } catch (error) {

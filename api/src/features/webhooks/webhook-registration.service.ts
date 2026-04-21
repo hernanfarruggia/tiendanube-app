@@ -2,15 +2,19 @@ import { tiendanubeApiClient } from '@config';
 
 class WebhookRegistrationService {
   async registerWebhooks(storeUserId: number): Promise<void> {
-    const baseUrl = process.env.API_BASE_URL || 'http://localhost:8000';
+    const baseUrl = process.env.API_BASE_URL;
 
     const webhooks = [
-      { event: 'product/created', url: `${baseUrl}/api/webhooks/product/create` },
-      { event: 'product/updated', url: `${baseUrl}/api/webhooks/product/update` },
-      { event: 'product/deleted', url: `${baseUrl}/api/webhooks/product/delete` },
+      { event: 'product/created', url: `${baseUrl}/webhooks/product/create` },
+      { event: 'product/updated', url: `${baseUrl}/webhooks/product/update` },
+      { event: 'product/deleted', url: `${baseUrl}/webhooks/product/delete` },
     ];
 
     try {
+      // First, delete any existing webhooks to avoid duplicates
+      await this.unregisterWebhooks(storeUserId);
+
+      // Then register new webhooks
       for (const webhook of webhooks) {
         await tiendanubeApiClient.post(`${storeUserId}/webhooks`, webhook);
         console.log(`[Webhook] Registered: ${webhook.event}`);
@@ -23,7 +27,13 @@ class WebhookRegistrationService {
 
   async unregisterWebhooks(storeUserId: number): Promise<void> {
     try {
-      const { data: webhooks } = await tiendanubeApiClient.get(`${storeUserId}/webhooks`);
+      // tiendanubeApiClient interceptor already returns response.data
+      const webhooks = await tiendanubeApiClient.get(`${storeUserId}/webhooks`) as any[];
+
+      if (!webhooks || webhooks.length === 0) {
+        console.log('[Webhook] No webhooks to unregister');
+        return;
+      }
 
       for (const webhook of webhooks) {
         await tiendanubeApiClient.delete(`${storeUserId}/webhooks/${webhook.id}`);
@@ -31,6 +41,7 @@ class WebhookRegistrationService {
       }
     } catch (error) {
       console.error('[Webhook] Unregistration failed:', error);
+      // Don't throw - allow registration to continue even if unregistration fails
     }
   }
 }

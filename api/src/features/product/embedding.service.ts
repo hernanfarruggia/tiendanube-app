@@ -1,5 +1,6 @@
 import { openaiClient, openaiConfig } from '@config/openai.client';
 import embeddingRepository from '@database/repositories/EmbeddingRepository';
+import textEnhancementService from './text-enhancement.service';
 
 export type Product = {
   id: string | number;
@@ -12,7 +13,7 @@ export type Product = {
   price?: string;
 };
 
-type Language = 'en' | 'pt' | 'es';
+type Language = 'pt' | 'es';
 
 class EmbeddingService {
   async generateEmbedding(text: string): Promise<number[]> {
@@ -41,17 +42,13 @@ class EmbeddingService {
     return allEmbeddings;
   }
 
-  createProductEmbeddingText(product: Product, lang: Language): string {
+  async createProductEmbeddingText(product: Product, lang: Language): Promise<string> {
     const parts: string[] = [];
 
-    const name = product.name?.[lang] || product.name?.es || product.name?.en || product.name?.pt;
+    const name = product.name?.[lang] || product.name?.es || product.name?.pt;
     if (name) parts.push(name);
 
-    const description =
-      product.description?.[lang] ||
-      product.description?.es ||
-      product.description?.en ||
-      product.description?.pt;
+    const description = product.description?.[lang] || product.description?.es || product.description?.pt;
     if (description) parts.push(description);
 
     if (product.tags) {
@@ -63,7 +60,6 @@ class EmbeddingService {
       const categoryName =
         product.categories[0].name?.[lang] ||
         product.categories[0].name?.es ||
-        product.categories[0].name?.en ||
         product.categories[0].name?.pt;
       if (categoryName) parts.push(`Category: ${categoryName}`);
     }
@@ -91,7 +87,15 @@ class EmbeddingService {
       if (variantInfo) parts.push(`Variants: ${variantInfo}`);
     }
 
-    return parts.join('\n');
+    const basicText = parts.join('\n');
+
+    try {
+      const enrichedTerms = await textEnhancementService.enrichProductText(basicText, lang);
+      return `${basicText}\n\nRelated terms: ${enrichedTerms}`;
+    } catch (error) {
+      console.warn('Product enrichment failed, using original text:', error);
+      return basicText;
+    }
   }
 
   async syncProductEmbedding(
@@ -99,8 +103,12 @@ class EmbeddingService {
     product: Product,
     storeUserId: number
   ): Promise<void> {
-    const languages: Language[] = ['en', 'pt', 'es'];
-    const embeddingTexts = languages.map((lang) => this.createProductEmbeddingText(product, lang));
+    const languages: Language[] = ['es', 'pt'];
+
+    const embeddingTextsPromises = languages.map((lang) =>
+      this.createProductEmbeddingText(product, lang)
+    );
+    const embeddingTexts = await Promise.all(embeddingTextsPromises);
 
     const embeddings = await this.generateEmbeddings(embeddingTexts);
 

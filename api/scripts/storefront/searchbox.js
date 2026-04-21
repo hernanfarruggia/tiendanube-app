@@ -15,7 +15,7 @@
 (function () {
   'use strict';
 
-  const API_URL = window.AI_SEARCH_API_URL || 'http://localhost:8000';
+  const API_URL = window.AI_SEARCH_API_URL || 'https://api-tiendanube.wearekadre.com';
 
   if (typeof LS === 'undefined') {
     console.warn('[AI Search] LS object not available');
@@ -46,7 +46,7 @@
 
   async function fetchPlaceholders() {
     try {
-      const response = await fetch(`${API_URL}/api/products/placeholders?store=${LS.store.id}`);
+      const response = await fetch(`${API_URL}/products/placeholders?store=${LS.store.id}`);
       if (!response.ok) throw new Error('Failed to fetch placeholders');
       const data = await response.json();
       placeholders = data.placeholders || getDefaultPlaceholders();
@@ -424,7 +424,7 @@
 
     try {
       const lang = LS.lang || 'es';
-      const response = await fetch(`${API_URL}/api/chat`, {
+      const response = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

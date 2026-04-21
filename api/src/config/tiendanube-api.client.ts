@@ -12,11 +12,22 @@ export const tiendanubeApiClient = axios.create({
 
 tiendanubeApiClient.interceptors.request.use(
   async (config) => {
+
     // Do something before request is sent
-    const { access_token } = await userRepository.findOne(
-      +config.url?.split("/")[0]!!
-    );
-    config.headers["Authorization"] = `bearer ${access_token}`;
+    const storeUserId = +config.url?.split("/")[0]!!;
+    const user = await userRepository.findOne(storeUserId);
+
+    config.headers["Authentication"] = `bearer ${user.access_token}`;
+
+    // 🔍 DEBUGGING: Log complete request details
+    console.log('🚀 [CLIENT REQUEST]', {
+      method: config.method?.toUpperCase(),
+      url: `${config.baseURL}${config.url}`,
+      headers: config.headers,
+      params: config.params,
+      data: config.data,
+    });
+
     return config;
   },
   function (error) {
@@ -38,12 +49,33 @@ tiendanubeApiClient.interceptors.request.use(
 
 tiendanubeApiClient.interceptors.response.use(
   (response) => {
+    // 🔍 DEBUGGING: Log complete response details
+    console.log('✅ [CLIENT RESPONSE]', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.config.url,
+      headers: response.headers,
+      data: response.data,
+    });
+
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
     return response.data || {};
   },
   function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
+    // 🔍 DEBUGGING: Log complete error details
+    console.error('❌ [ERROR]', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      method: error.config?.method?.toUpperCase(),
+      requestData: error.config?.data,
+      responseData: error.response?.data,
+      headers: error.response?.headers,
+    });
+
     // Do something with response error
     if (error.isAxiosError) {
       const { data } = error.response;

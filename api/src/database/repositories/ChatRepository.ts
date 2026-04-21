@@ -7,7 +7,7 @@ type ChatSession = {
   created_at: Date;
 };
 
-type ChatMessage = {
+export type ChatMessage = {
   id: number;
   session_id: string;
   role: string;
@@ -25,6 +25,15 @@ class ChatRepository {
       [storeUserId]
     );
     return result.rows[0].session_id;
+  }
+
+  async createSessionWithId(sessionId: string, storeUserId: number): Promise<void> {
+    await query(
+      `INSERT INTO chat_sessions (session_id, store_user_id)
+       VALUES ($1, $2)
+       ON CONFLICT (session_id) DO NOTHING`,
+      [sessionId, storeUserId]
+    );
   }
 
   async getSession(sessionId: string): Promise<ChatSession | null> {

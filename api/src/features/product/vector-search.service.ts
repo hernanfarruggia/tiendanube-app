@@ -2,6 +2,7 @@ import { openaiConfig } from '@config/openai.client';
 import { tiendanubeApiClient } from '@config';
 import embeddingRepository from '@database/repositories/EmbeddingRepository';
 import embeddingService from './embedding.service';
+import textEnhancementService from './text-enhancement.service';
 
 type SearchResult = {
   product: any;
@@ -12,10 +13,19 @@ class VectorSearchService {
   async semanticSearch(
     query: string,
     storeUserId: number,
-    language: string = 'es',
+    language: 'es' | 'pt' = 'es',
     limit: number = openaiConfig.vectorSearchLimit
   ): Promise<SearchResult[]> {
-    const queryEmbedding = await embeddingService.generateEmbedding(query);
+    let enrichedQuery = query;
+    try {
+      enrichedQuery = await textEnhancementService.enrichQuery(query, language);
+      console.log(`Query enriched: "${query}" → "${enrichedQuery}"`);
+    } catch (error) {
+      console.warn('Query enrichment failed, using original:', error);
+      enrichedQuery = query;
+    }
+
+    const queryEmbedding = await embeddingService.generateEmbedding(enrichedQuery);
 
     const similarProducts = await embeddingRepository.findSimilar(
       queryEmbedding,
@@ -24,8 +34,7 @@ class VectorSearchService {
       limit * 2
     );
 
-    const filteredProducts = similarProducts.filter((p) => p.similarity >= 0.7);
-
+    const filteredProducts = similarProducts.filter((p) => p.similarity >= 0.5);
     const topProducts = filteredProducts.slice(0, limit);
 
     const productsWithData = await Promise.all(

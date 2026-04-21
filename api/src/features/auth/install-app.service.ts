@@ -23,6 +23,8 @@ class InstallAppService {
 
     const authenticateResponse = await this.authenticateApp(body);
 
+    console.log('auth response ->', authenticateResponse)
+
     // This condition will be true when the code has been used or is invalid.
     if (authenticateResponse.error && authenticateResponse.error_description) {
       throw new BadRequestException(
@@ -43,7 +45,7 @@ class InstallAppService {
     await userRepository.save(authenticateResponse);
 
     // Register webhooks for the newly installed app
-    await WebhookRegistrationService.registerWebhooks(authenticateResponse.user_id);
+    // await WebhookRegistrationService.registerWebhooks(authenticateResponse.user_id);
 
     // Get store information to obtain the original_domain
     const storeInfo = await this.getStoreInfo(authenticateResponse.user_id);

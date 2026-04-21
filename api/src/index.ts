@@ -23,19 +23,21 @@ const app = express();
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms")
 );
+// Permissive CORS - Security handled by JWT validation (store_id verification)
 app.use(
   cors({
-    origin: [
-      'https://*.tiendanube.com',
-      'https://*.nuvemshop.com.br',
-      'http://localhost:5173',
-      'http://localhost:3000',
-    ],
+    origin: true, // Allow all origins - security is handled by JWT + DB validation
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../scripts')));
+
+// Handle preflight requests explicitly before authentication
+app.options('*', cors());
+
 app.use(beforeCheckClientMiddleware);
 app.use(AppRoutes);
 app.use(errorHandlingMiddleware);
